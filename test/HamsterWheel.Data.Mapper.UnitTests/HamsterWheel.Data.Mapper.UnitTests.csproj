@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+      <Compile Update="BuildMapUnitTests.cs">
+        <DependentUpon>DataMapperTests.cs</DependentUpon>
+      </Compile>
+      <Compile Update="MapUnitTests.cs">
+        <DependentUpon>DataMapperTests.cs</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\HamsterWheel.Data.Mapper\HamsterWheel.Data.Mapper.csproj" />
+    </ItemGroup>
+
+</Project>
