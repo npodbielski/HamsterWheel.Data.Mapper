@@ -1,0 +1,8 @@
+﻿<Solution>
+  <Folder Name="/Src/">
+    <Project Path="src/HamsterWheel.Data.Mapper\HamsterWheel.Data.Mapper.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="test/HamsterWheel.Data.Mapper.UnitTests/HamsterWheel.Data.Mapper.UnitTests.csproj" />
+  </Folder>
+</Solution>

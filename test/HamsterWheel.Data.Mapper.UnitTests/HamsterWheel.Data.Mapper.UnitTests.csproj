@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+      <Compile Update="BuildMapUnitTests.cs">
+        <DependentUpon>MapBuilderUnitTests.cs</DependentUpon>
+      </Compile>
+      <Compile Update="MapUnitTests.cs">
+        <DependentUpon>DataMapperUnitTests.cs</DependentUpon>
+      </Compile>
+      <Compile Update="TryGetSourceFromCache.cs">
+        <DependentUpon>PropertyAccessorFactoryUnitTests.cs</DependentUpon>
+      </Compile>
+      <Compile Update="UnwindSourcePocoClassesUnitTests.cs">
+        <DependentUpon>MapBuilderUnitTests.cs</DependentUpon>
+      </Compile>
+      <Compile Update="ToSourceProp.cs">
+        <DependentUpon>PropertyAccessorFactoryUnitTests.cs</DependentUpon>
+      </Compile>
+      <Compile Update="ToDestProp.cs">
+        <DependentUpon>PropertyAccessorFactoryUnitTests.cs</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\HamsterWheel.Data.Mapper\HamsterWheel.Data.Mapper.csproj" />
+    </ItemGroup>
+
+</Project>
