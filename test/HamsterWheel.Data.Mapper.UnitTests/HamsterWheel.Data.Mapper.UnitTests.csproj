@@ -2,10 +2,22 @@
 
     <ItemGroup>
       <Compile Update="BuildMapUnitTests.cs">
-        <DependentUpon>DataMapperTests.cs</DependentUpon>
+        <DependentUpon>MapBuilderUnitTests.cs</DependentUpon>
       </Compile>
       <Compile Update="MapUnitTests.cs">
-        <DependentUpon>DataMapperTests.cs</DependentUpon>
+        <DependentUpon>DataMapperUnitTests.cs</DependentUpon>
+      </Compile>
+      <Compile Update="TryGetSourceFromCache.cs">
+        <DependentUpon>PropertyAccessorFactoryUnitTests.cs</DependentUpon>
+      </Compile>
+      <Compile Update="UnwindSourcePocoClassesUnitTests.cs">
+        <DependentUpon>MapBuilderUnitTests.cs</DependentUpon>
+      </Compile>
+      <Compile Update="ToSourceProp.cs">
+        <DependentUpon>PropertyAccessorFactoryUnitTests.cs</DependentUpon>
+      </Compile>
+      <Compile Update="ToDestProp.cs">
+        <DependentUpon>PropertyAccessorFactoryUnitTests.cs</DependentUpon>
       </Compile>
     </ItemGroup>
 

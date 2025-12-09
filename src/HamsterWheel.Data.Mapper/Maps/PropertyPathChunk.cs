@@ -1,4 +1,4 @@
-namespace HamsterWheel.Data.Mapper;
+namespace HamsterWheel.Data.Mapper.Maps;
 
 public record PropertyPathChunk(string Name)
 {

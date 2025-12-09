@@ -8,8 +8,6 @@
     <ItemGroup>
       <PackageReference Include="HamsterWheel.CodeShare.Common" PrivateAssets="All" />
       <PackageReference Include="HamsterWheel.HLinq"/>
-      <PackageReference Include="HamsterWheel.HLinq.Abstractions" />
-      <PackageReference Include="HamsterWheel.HLinq.AspNet" />
     </ItemGroup>
 
 </Project>

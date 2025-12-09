@@ -1,21 +1,39 @@
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using FluentAssertions;
+using HamsterWheel.Data.Mapper.Maps;
 
 namespace HamsterWheel.Data.Mapper.UnitTests;
 
 using static DataMapper;
 
-partial class DataMapperTests
+partial class MapBuilderUnitTests
 {
     [Fact]
     public void BuildMap_WhenTwoStarsAndMatchingTypes_ThenIncludeAllProperties()
     {
         //arrange
         Map expected = [("Prop2", "Prop2"), ("Prop3", "Prop3")];
-        var destination = new NestedObject();
-        var source = new NestedObject();
+        var destination = new DataMapperUnitTests.NestedObject();
+        var source = new DataMapperUnitTests.NestedObject();
 
         //act
         var map = BuildMap(source, destination);
+
+        //assert
+        map.Should().HavePaths(expected);
+    }
+
+    [Fact]
+    public void BuildMap_WhenWithTwoTypes_ThenReturnsCorrectMap()
+    {
+        //arrange
+        Map expected = [("Prop2", "Prop2"), ("Prop3", "Prop3")];
+
+        //act
+#pragma warning disable CA2263 //whole point of tests
+        var map = BuildMap(typeof(DataMapperUnitTests.NestedObject), typeof(DataMapperUnitTests.FlatHierarchyClass));
+#pragma warning restore CA2263
 
         //assert
         map.Should().HavePaths(expected);
@@ -26,8 +44,8 @@ partial class DataMapperTests
     {
         //arrange
         Map expected = [("Prop2", "Prop2"), ("Prop3", "Prop3")];
-        var destination = new NestedObject();
-        var source = new NestedObject();
+        var destination = new DataMapperUnitTests.NestedObject();
+        var source = new DataMapperUnitTests.NestedObject();
 
         //act
         var map = BuildMap(source, destination, AnyToAnyMap);
@@ -41,8 +59,8 @@ partial class DataMapperTests
     {
         //arrange
         Map expected = [("Prop2", "Prop2"), ("Prop3", "Prop3")];
-        var destination = new FlatHierarchyClass();
-        var source = new NestedObject();
+        var destination = new DataMapperUnitTests.FlatHierarchyClass();
+        var source = new DataMapperUnitTests.NestedObject();
 
         //act
         var map = BuildMap(source, destination, AnyToAnyMap);
@@ -55,8 +73,8 @@ partial class DataMapperTests
     public void BuildMap_WhenTwoStarsAndDifferentTypesWithoutMatchingProps_ThenReturnsEmpty()
     {
         //arrange
-        var destination = new DummyTokenInfo();
-        var source = new NestedObject();
+        var destination = new DataMapperUnitTests.DummyTokenInfo();
+        var source = new DataMapperUnitTests.NestedObject();
 
         //act
         var map = BuildMap(source, destination, AnyToAnyMap);
@@ -71,8 +89,8 @@ partial class DataMapperTests
     {
         //arrange
         Map expected = [("Key", "Key")];
-        var destination = new GuidKeyEntity();
-        var source = new StringKeyEntity();
+        var destination = new DataMapperUnitTests.GuidKeyEntity();
+        var source = new DataMapperUnitTests.StringKeyEntity();
 
         //act
         var map = BuildMap(source, destination, AnyToAnyMap);
@@ -86,8 +104,10 @@ partial class DataMapperTests
     {
         //arrange
         Map expected = [("Key", "Nested.Key")];
-        var destination = new DirectRoot<GuidKeyEntity>(new GuidKeyEntity());
-        var source = new StringKeyEntity();
+        var destination =
+            new DataMapperUnitTests.DirectRoot<DataMapperUnitTests.GuidKeyEntity>(
+                new DataMapperUnitTests.GuidKeyEntity());
+        var source = new DataMapperUnitTests.StringKeyEntity();
 
         //act
         var map = BuildMap(source, destination, [(AnyProperty, "Nested")]);
@@ -101,8 +121,10 @@ partial class DataMapperTests
     {
         //arrange
         Map expected = [("Nested.Key", "Key")];
-        var destination = new StringKeyEntity();
-        var source = new DirectRoot<GuidKeyEntity>(new GuidKeyEntity());
+        var destination = new DataMapperUnitTests.StringKeyEntity();
+        var source =
+            new DataMapperUnitTests.DirectRoot<DataMapperUnitTests.GuidKeyEntity>(
+                new DataMapperUnitTests.GuidKeyEntity());
 
         //act
         var map = BuildMap(source, destination, [("Nested", AnyProperty)]);
@@ -116,8 +138,12 @@ partial class DataMapperTests
     {
         //arrange
         Map expected = [("Nested", "Nested")];
-        var destination = new DirectRoot<StringKeyEntity>(new StringKeyEntity());
-        var source = new DirectRoot<GuidKeyEntity>(new GuidKeyEntity());
+        var destination =
+            new DataMapperUnitTests.DirectRoot<DataMapperUnitTests.StringKeyEntity>(
+                new DataMapperUnitTests.StringKeyEntity());
+        var source =
+            new DataMapperUnitTests.DirectRoot<DataMapperUnitTests.GuidKeyEntity>(
+                new DataMapperUnitTests.GuidKeyEntity());
 
         //act
         var map = BuildMap(source, destination, [("Nested", "Nested")]);
@@ -131,8 +157,12 @@ partial class DataMapperTests
     {
         //arrange
         Map expected = [("Nested.Key", "Nested.Key")];
-        var destination = new DirectRoot<StringKeyEntity>(new StringKeyEntity());
-        var source = new DirectRoot<GuidKeyEntity>(new GuidKeyEntity());
+        var destination =
+            new DataMapperUnitTests.DirectRoot<DataMapperUnitTests.StringKeyEntity>(
+                new DataMapperUnitTests.StringKeyEntity());
+        var source =
+            new DataMapperUnitTests.DirectRoot<DataMapperUnitTests.GuidKeyEntity>(
+                new DataMapperUnitTests.GuidKeyEntity());
 
         //act
         var map = BuildMap(source, destination, [("Nested.*", "Nested")]);
@@ -146,8 +176,12 @@ partial class DataMapperTests
     {
         //arrange
         Map expected = [("Nested.Key", "Nested.Key")];
-        var destination = new DirectRoot<StringKeyEntity>(new StringKeyEntity());
-        var source = new DirectRoot<GuidKeyEntity>(new GuidKeyEntity());
+        var destination =
+            new DataMapperUnitTests.DirectRoot<DataMapperUnitTests.StringKeyEntity>(
+                new DataMapperUnitTests.StringKeyEntity());
+        var source =
+            new DataMapperUnitTests.DirectRoot<DataMapperUnitTests.GuidKeyEntity>(
+                new DataMapperUnitTests.GuidKeyEntity());
 
         //act
         var map = BuildMap(source, destination, [("Nested", "Nested.*")]);
@@ -161,8 +195,12 @@ partial class DataMapperTests
     {
         //arrange
         Map expected = [("DeeplyNested.Nested", "DeeplyNested.Nested")];
-        var source = new DeeplyNestedRoot<GuidKeyEntity>(new GuidKeyEntity());
-        var destination = new DeeplyNestedRoot<StringKeyEntity>(new StringKeyEntity());
+        var source =
+            new DataMapperUnitTests.DeeplyNestedRoot<DataMapperUnitTests.GuidKeyEntity>(
+                new DataMapperUnitTests.GuidKeyEntity());
+        var destination =
+            new DataMapperUnitTests.DeeplyNestedRoot<DataMapperUnitTests.StringKeyEntity>(
+                new DataMapperUnitTests.StringKeyEntity());
 
         //act
         var map = BuildMap(source, destination, [("DeeplyNested.Nested", "DeeplyNested.Nested")]);
@@ -176,8 +214,12 @@ partial class DataMapperTests
     {
         //arrange
         Map expected = [("Nested", "DeeplyNested.Nested")];
-        var source = new DirectRoot<StringKeyEntity>(new StringKeyEntity());
-        var destination = new DeeplyNestedRoot<GuidKeyEntity>(new GuidKeyEntity());
+        var source =
+            new DataMapperUnitTests.DirectRoot<DataMapperUnitTests.StringKeyEntity>(
+                new DataMapperUnitTests.StringKeyEntity());
+        var destination =
+            new DataMapperUnitTests.DeeplyNestedRoot<DataMapperUnitTests.GuidKeyEntity>(
+                new DataMapperUnitTests.GuidKeyEntity());
 
         //act
         var map = BuildMap(source, destination, [("Nested", "DeeplyNested.Nested")]);
@@ -191,8 +233,12 @@ partial class DataMapperTests
     {
         //arrange
         Map expected = [("DeeplyNested.Nested", "Nested")];
-        var source = new DeeplyNestedRoot<StringKeyEntity>(new StringKeyEntity());
-        var destination = new DirectRoot<GuidKeyEntity>(new GuidKeyEntity());
+        var source =
+            new DataMapperUnitTests.DeeplyNestedRoot<DataMapperUnitTests.StringKeyEntity>(
+                new DataMapperUnitTests.StringKeyEntity());
+        var destination =
+            new DataMapperUnitTests.DirectRoot<DataMapperUnitTests.GuidKeyEntity>(
+                new DataMapperUnitTests.GuidKeyEntity());
 
         //act
         var map = BuildMap(source, destination, [("DeeplyNested.Nested", "Nested")]);
@@ -207,8 +253,12 @@ partial class DataMapperTests
     {
         //arrange
         Map expected = [("DeeplyNested.Nested.Key", "DeeplyNested.Nested.Key")];
-        var source = new DeeplyNestedRoot<GuidKeyEntity>(new GuidKeyEntity());
-        var destination = new DeeplyNestedRoot<StringKeyEntity>(new StringKeyEntity());
+        var source =
+            new DataMapperUnitTests.DeeplyNestedRoot<DataMapperUnitTests.GuidKeyEntity>(
+                new DataMapperUnitTests.GuidKeyEntity());
+        var destination =
+            new DataMapperUnitTests.DeeplyNestedRoot<DataMapperUnitTests.StringKeyEntity>(
+                new DataMapperUnitTests.StringKeyEntity());
 
         //act
         var map = BuildMap(source, destination, [("DeeplyNested.Nested.*", "DeeplyNested.Nested")]);
@@ -223,8 +273,12 @@ partial class DataMapperTests
     {
         //arrange
         Map expected = [("Nested.Key", "DeeplyNested.Nested.Key")];
-        var destination = new DeeplyNestedRoot<StringKeyEntity>(new StringKeyEntity());
-        var source = new DirectRoot<GuidKeyEntity>(new GuidKeyEntity());
+        var destination =
+            new DataMapperUnitTests.DeeplyNestedRoot<DataMapperUnitTests.StringKeyEntity>(
+                new DataMapperUnitTests.StringKeyEntity());
+        var source =
+            new DataMapperUnitTests.DirectRoot<DataMapperUnitTests.GuidKeyEntity>(
+                new DataMapperUnitTests.GuidKeyEntity());
 
         //act
         var map = BuildMap(source, destination, [("Nested.*", "DeeplyNested.Nested")]);
@@ -239,8 +293,12 @@ partial class DataMapperTests
     {
         //arrange
         Map expected = [("DeeplyNested.Nested.Key", "Nested.Key")];
-        var source = new DeeplyNestedRoot<GuidKeyEntity>(new GuidKeyEntity());
-        var destination = new DirectRoot<StringKeyEntity>(new StringKeyEntity());
+        var source =
+            new DataMapperUnitTests.DeeplyNestedRoot<DataMapperUnitTests.GuidKeyEntity>(
+                new DataMapperUnitTests.GuidKeyEntity());
+        var destination =
+            new DataMapperUnitTests.DirectRoot<DataMapperUnitTests.StringKeyEntity>(
+                new DataMapperUnitTests.StringKeyEntity());
 
         //act
         var map = BuildMap(source, destination, [("DeeplyNested.Nested.*", "Nested")]);
@@ -251,12 +309,16 @@ partial class DataMapperTests
 
     [Fact]
     public void
-        BuildMap_WhenSourceDeeplyNestedPropertyAndDestinationDeeplyNestedWihtStar_ThenReturnsAnySubMatchingProperties()
+        BuildMap_WhenSourceDeeplyNestedPropertyAndDestinationDeeplyNestedWithStar_ThenReturnsAnySubMatchingProperties()
     {
         //arrange
         Map expected = [("DeeplyNested.Nested.Key", "DeeplyNested.Nested.Key")];
-        var source = new DeeplyNestedRoot<GuidKeyEntity>(new GuidKeyEntity());
-        var destination = new DeeplyNestedRoot<StringKeyEntity>(new StringKeyEntity());
+        var source =
+            new DataMapperUnitTests.DeeplyNestedRoot<DataMapperUnitTests.GuidKeyEntity>(
+                new DataMapperUnitTests.GuidKeyEntity());
+        var destination =
+            new DataMapperUnitTests.DeeplyNestedRoot<DataMapperUnitTests.StringKeyEntity>(
+                new DataMapperUnitTests.StringKeyEntity());
 
         //act
         var map = BuildMap(source, destination, [("DeeplyNested.Nested", "DeeplyNested.Nested.*")]);
@@ -271,8 +333,12 @@ partial class DataMapperTests
     {
         //arrange
         Map expected = [("Nested.Key", "DeeplyNested.Nested.Key")];
-        var destination = new DeeplyNestedRoot<StringKeyEntity>(new StringKeyEntity());
-        var source = new DirectRoot<GuidKeyEntity>(new GuidKeyEntity());
+        var destination =
+            new DataMapperUnitTests.DeeplyNestedRoot<DataMapperUnitTests.StringKeyEntity>(
+                new DataMapperUnitTests.StringKeyEntity());
+        var source =
+            new DataMapperUnitTests.DirectRoot<DataMapperUnitTests.GuidKeyEntity>(
+                new DataMapperUnitTests.GuidKeyEntity());
 
         //act
         var map = BuildMap(source, destination, [("Nested", "DeeplyNested.Nested.*")]);
@@ -287,8 +353,12 @@ partial class DataMapperTests
     {
         //arrange
         Map expected = [("DeeplyNested.Nested.Key", "Nested.Key")];
-        var source = new DeeplyNestedRoot<GuidKeyEntity>(new GuidKeyEntity());
-        var destination = new DirectRoot<StringKeyEntity>(new StringKeyEntity());
+        var source =
+            new DataMapperUnitTests.DeeplyNestedRoot<DataMapperUnitTests.GuidKeyEntity>(
+                new DataMapperUnitTests.GuidKeyEntity());
+        var destination =
+            new DataMapperUnitTests.DirectRoot<DataMapperUnitTests.StringKeyEntity>(
+                new DataMapperUnitTests.StringKeyEntity());
 
         //act
         var map = BuildMap(source, destination, [("DeeplyNested.Nested", "Nested.*")]);
@@ -302,7 +372,7 @@ partial class DataMapperTests
     {
         //arrange
         Map expected = [(".", "Prop2")];
-        var destination = new NestedObject();
+        var destination = new DataMapperUnitTests.NestedObject();
         var source = 1;
 
         //act
@@ -312,23 +382,162 @@ partial class DataMapperTests
         map.Should().HavePaths(expected);
     }
 
-    public class GuidKeyEntity
+    [Fact]
+    public void BuildMap_WhenSourceWildcardDoesNotHaveMatchingProp_ThenEmptyMapReturned()
     {
-        public Guid Key { get; set; }
+        //arrange
+        Map requestedMap = [("Test*", "Prop2")];
+        var destination = new DataMapperUnitTests.NestedObject();
+        var source = new { Hello = "World" };
+
+        //act
+        var compiledMap = BuildMap(source, destination, requestedMap);
+
+        //assert
+        compiledMap.Should().HavePaths([]);
     }
 
-    public class StringKeyEntity
+    [Fact]
+    public void BuildMap_WhenWildcardAtTheStart_ThenReturnsMatchingProperties()
     {
-        public string Key { get; set; } = null!;
+        //arrange
+        Map requestedMap = [("*llo", "Prop2")];
+        var destination = new DataMapperUnitTests.NestedObject();
+        var source = new { Hello = "World" };
+
+        //act
+        var compiledMap = BuildMap(source, destination, requestedMap);
+
+        //assert
+        compiledMap.Should().HavePaths([("Hello", "Prop2")]);
     }
 
-    public class DirectRoot<T>(T nestedObject)
+    [Fact]
+    public void BuildMap_WhenWildcardInTheMiddle_ThenReturnsMatchingProperties()
     {
-        public T Nested { get; set; } = nestedObject;
+        //arrange
+        Map requestedMap = [("H*llo", "Prop2")];
+        var destination = new DataMapperUnitTests.NestedObject();
+        var source = new { Hello = "World" };
+
+        //act
+        var compiledMap = BuildMap(source, destination, requestedMap);
+
+        //assert
+        compiledMap.Should().HavePaths([("Hello", "Prop2")]);
     }
 
-    public class DeeplyNestedRoot<T>(T nestedObject)
+    [Fact]
+    public void BuildMap_WhenPropertiesCacheReturnsNull_ThenThrowsException()
     {
-        public DirectRoot<T> DeeplyNested { get; set; } = new(nestedObject);
+        //arrange
+        var destination = new DataMapperUnitTests.NestedObject();
+        var source = new { Hello = "World" };
+        var action = () => BuildMap(source, destination, [("Hello", "World")]);
+
+        //act
+        var exception = action.Should().Throw<MissingPropertyException>();
+
+        //assert
+        exception.WithMessage(
+            $"No property or index: 'World' found on type '{typeof(DataMapperUnitTests.NestedObject)}'");
+    }
+
+    [Fact]
+    public void BuildMap_WhenSourceIsDictionary_ThenCanMap()
+    {
+        //arrange
+        var destination = new DataMapperUnitTests.NestedObject();
+        Dictionary<string, object> source = new() { { "Prop2", 1 } };
+
+        //act
+        var compiledMap = BuildMap(source, destination, [("Prop2", "Prop2")]);
+
+        //assert
+        compiledMap.Should().HavePaths([("Prop2", "Prop2")]);
+    }
+
+    [Fact]
+    public void BuildMap_WhenDestinationIsDictionary_ThenCanMap()
+    {
+        //arrange
+        Dictionary<string, object> destination = new() { { "Prop2", 1 } };
+        var source = new DataMapperUnitTests.NestedObject();
+
+        //act
+        var compiledMap = BuildMap(source, destination, [("Prop2", "Prop2")]);
+
+        //assert
+        compiledMap.Should().HavePaths([("Prop2", "Prop2")]);
+    }
+
+    [Fact]
+    public void BuildMap_WhenSourceIsJsonNode_ThenCanMap()
+    {
+        //arrange
+        var source = JsonNode.Parse(JsonSerializer.Serialize(new { Prop2 = 1 }));
+        var destination = new DataMapperUnitTests.NestedObject();
+
+        //act
+        var compiledMap = BuildMap(source, destination, [("Prop2", "Prop2")]);
+
+        //assert
+        compiledMap.Should().HavePaths([("Prop2", "Prop2")]);
+    }
+
+    [Fact]
+    public void BuildMap_WhenMapsILists_ThenCanMap()
+    {
+        //arrange
+        string[] source = ["a"];
+        List<string> destination = [];
+
+        //act
+        var compiledMap = BuildMap(source, destination, [("0", "0")]);
+
+        //assert
+        compiledMap.Should().HavePaths([("0", "0")]);
+    }
+
+    [Fact]
+    public void BuildMap_WhenMapFromEnumerable_ThenCanMap()
+    {
+        //arrange
+        var source = Enumerable.Range(0, 10);
+        List<string> destination = [];
+
+        //act
+        var compiledMap = BuildMap(source, destination, [("0", "0")]);
+
+        //assert
+        compiledMap.Should().HavePaths([("0", "0")]);
+    }
+
+    [Fact]
+    public void BuildMap_WhenDestinationIsJsonNode_ThenCanMap()
+    {
+        //arrange
+        var destination = new DataMapperUnitTests.NestedObject();
+        var source = JsonNode.Parse(JsonSerializer.Serialize(new { Prop2 = 1 }));
+
+        //act
+        var compiledMap = BuildMap(source, destination, [("Prop2", "Prop2")]);
+
+        //assert
+        compiledMap.Should().HavePaths([("Prop2", "Prop2")]);
+    }
+
+    [Fact]
+    public void BuildMap_WhenSourceIsJsonDocument_ThenCanMap()
+    {
+        //arrange
+        var source = JsonDocument.Parse(JsonSerializer.Serialize(new { Prop2 = 1 }));
+        var destination = new DataMapperUnitTests.NestedObject();
+
+        //act
+        var compiledMap = BuildMap(source, destination, [("Prop2", "Prop2")]);
+
+        //assert
+        compiledMap.Should().HavePaths([("Prop2", "Prop2")]);
     }
 }

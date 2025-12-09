@@ -1,6 +1,7 @@
 using FluentAssertions;
 using FluentAssertions.Collections;
 using FluentAssertions.Execution;
+using HamsterWheel.Data.Mapper.Maps;
 
 namespace HamsterWheel.Data.Mapper.UnitTests;
 

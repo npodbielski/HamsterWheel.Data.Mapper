@@ -4,14 +4,12 @@
   </PropertyGroup>
   <ItemGroup>
     <!--Hamster Wheel packages-->
+    <PackageVersion Include="HamsterWheel.CodeShare.Common" Version="0.6.0-alpha-8296" />
     <PackageVersion Include="HamsterWheel.FluentCodeGenerators" Version="0.4.4-alpha-7894" />
     <PackageVersion Include="HamsterWheel.FluentCodeGenerators.Abstractions" Version="0.4.4-alpha-7894" />
-    <PackageVersion Include="HamsterWheel.HLinq.Abstractions" Version="0.4.9-alpha-7821" />
-    <PackageVersion Include="HamsterWheel.HLinq" Version="0.4.9-alpha-7821" />
-    <PackageVersion Include="HamsterWheel.HLinq.AspNet" Version="0.4.9-alpha-7821" />
+    <PackageVersion Include="HamsterWheel.HLinq" Version="0.5.0-alpha-8261" />
     <PackageVersion Include="HamsterWheel.HLinq.PgSql" Version="0.4.9-alpha-7821" />
     <PackageVersion Include="HamsterWheel.CodeShare.NetStandard" Version="0.5.0-alpha-7989" />
-    <PackageVersion Include="HamsterWheel.CodeShare.Common" Version="0.5.0-0.5.0-alpha-7989" />
     <!--Nuget packages-->
     <PackageVersion Include="CommandLineParser" Version="2.9.1" />
     <PackageVersion Include="Cronos" Version="0.11.1" />
