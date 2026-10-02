@@ -75,7 +75,7 @@ public class PropertyAccessorFactory(
 
     public IPropertyAccessor ToSourceProp(IPropertyAccessor parentProp, IPropertyAccessor subProp)
     {
-        var newChunks = new PropertyPath(parentProp.Path.Chunks.Concat(subProp.Path.Chunks).ToArray());
+        var newChunks = new PropertyPath([.. parentProp.Path.Chunks, .. subProp.Path.Chunks]);
         if (parentProp.Getter is null)
         {
             throw new RootSourcePropertyGetterNullException();

@@ -25,7 +25,11 @@ public class MapBuilder(
             }
 
             var destinations = ExpandDestinationWildcards(destination, destPath);
-            if (destinations.Length <= 0)
+
+            destinations =
+                [.. destinations.Where(d => fullMap.All(m => m.Destination.ToString() != d.ToString()))];
+
+            if (destinations.Count <= 0)
             {
                 continue;
             }
@@ -53,6 +57,7 @@ public class MapBuilder(
                     if (destinationProp != null)
                     {
                         fullMap.Add(new PropertyMapping(sourceProp, destinationProp));
+                        destinations.Remove(destinationProp);
                     }
                 }
             }
@@ -60,7 +65,7 @@ public class MapBuilder(
             else
             {
                 //if the length of both collections is the same; if not probably, a wildcard map is ambiguous
-                if (sources.Length == destinations.Length)
+                if (sources.Length == destinations.Count)
                 {
                     fullMap.AddRange(sources.Zip(destinations, (s, d) => new PropertyMapping(s, d)));
                 }
@@ -139,10 +144,12 @@ public class MapBuilder(
         return sources.ToArray();
 
         IPropertyAccessor[] GetPropsForChunk(PropertyPathChunk chunk, Type type) =>
-            chunk.HaveWildcard ? GetIntermediateProperties(type, chunk) : [propertyAccessorFactory.Create(type, chunk, mustHaveGetter: true)];
+            chunk.HaveWildcard
+                ? GetIntermediateProperties(type, chunk)
+                : [propertyAccessorFactory.Create(type, chunk, mustHaveGetter: true)];
     }
 
-    private IPropertyAccessor[] ExpandDestinationWildcards(ObjectContext destination, PropertyPath path)
+    private List<IPropertyAccessor> ExpandDestinationWildcards(ObjectContext destination, PropertyPath path)
     {
         var destinations = new List<IPropertyAccessor>();
         var destinationType =
@@ -183,10 +190,12 @@ public class MapBuilder(
             }
         }
 
-        return destinations.ToArray();
+        return [.. destinations];
 
         IPropertyAccessor[] GetPropsForChunk(PropertyPathChunk chunk, Type type) =>
-            chunk.HaveWildcard ? GetNestedDestinationProperties(type, chunk) : [propertyAccessorFactory.Create(type, chunk, mustHaveSetter: true)];
+            chunk.HaveWildcard
+                ? GetNestedDestinationProperties(type, chunk)
+                : [propertyAccessorFactory.Create(type, chunk, mustHaveSetter: true)];
     }
 
     internal IPropertyAccessor[]? UnwindSourcePocoClasses(PropertyPathChunk chunk, IPropertyAccessor property) =>

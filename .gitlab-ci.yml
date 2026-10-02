@@ -1,8 +1,37 @@
-image: mcr.microsoft.com/dotnet/sdk:9.0
+include:
+  # Shared test + coverage job (hidden .dotnet-test): junit and its own cobertura
+  # report per suite, which is what the badges read.
+  - project: "ci/templates"
+    ref: "main"
+    file: "/dotnet-test-coverage.yml"
+  # Release jobs (hidden .badges, .release): badge SVGs on the public badge
+  # host, the git tag, the GitLab release and the public GitHub mirror.
+  - project: "ci/templates"
+    ref: "main"
+    file: "/release.yml"
+  # Feed policy and release gate for projects publishing public packages
+  # (hidden .nuget-restore, .release-policy).
+  - project: "ci/templates"
+    ref: "main"
+    file: "/nuget-project.yml"
+  # README gate (hidden .readme-check): badges referenced, versions in sync.
+  - project: "ci/templates"
+    ref: "main"
+    file: "/readme-check.yml"
+
+stages:
+  - build
+  - test
+  - release
+  - deploy
+
+image: mcr.microsoft.com/dotnet/sdk:10.0
 
 variables:
   OBJECTS_DIRECTORY: 'obj'
   NUGET_PACKAGES_DIRECTORY: '.nuget'
+  NUGET_RESTORE_TARGET: './'
+  NUGET_FAMILY_FEED_URL: "${CI_API_V4_URL}/groups/69/-/packages/nuget/index.json"
   SOURCE_CODE_PATH: './'
   TEST_CODE_PATH: 'test'
   FF_NETWORK_PER_BUILD: "true"
@@ -16,9 +45,7 @@ cache:
   policy: pull-push
 
 before_script:
-  # Configure the GitLab package registry as a NuGet source
-  - 'dotnet nuget add source "${CI_API_V4_URL}/groups/69/-/packages/nuget/index.json" --name group --username gitlab-ci-token --password $CI_JOB_TOKEN --store-password-in-clear-text'
-  - 'dotnet restore $SOURCE_CODE_PATH --packages $NUGET_PACKAGES_DIRECTORY'
+  - !reference [.nuget-restore, script]
 
 build:
   stage: build
@@ -27,31 +54,63 @@ build:
     - 'dotnet build $SOURCE_CODE_PATH --no-restore'
 
 tests:
+  extends: .dotnet-test
+  stage: test
   services:
     - name: postgres
       variables:
         POSTGRES_DB: Demo
         POSTGRES_PASSWORD: outflank-outage-undoing
-  stage: test
-  script:
-    - 'dotnet tool install --local dotnet-coverage --create-manifest-if-needed'
-    - 'dotnet tool install --local dotnet-reportgenerator-globaltool'
-    - 'dotnet test $SOURCE_CODE_PATH --no-restore /p:CollectCoverage=true --collect:"XPlat Code Coverage" --logger:"junit;LogFileName=rspec.xml" /p:Exclude="[HamsterWheel.Exceptions*]*" /p:Exclude="[HamsterWheel.Utils*]*"'
-    - 'dotnet tool run dotnet-coverage merge -o $TEST_CODE_PATH/merged.cobertura.xml -f cobertura $TEST_CODE_PATH/**/coverage.cobertura.xml'
-    - 'dotnet tool run reportgenerator -reports:$TEST_CODE_PATH/merged.cobertura.xml -targetdir:coveragereport -reporttypes:JsonSummary'
-    - 'cat coveragereport/Summary.json | grep linecoverage'
-  coverage: '/linecoverage":\s([\d\.]+?),/'
-  artifacts:
-    when: always
-    paths:
-      - $TEST_CODE_PATH/**/rspec.xml
-    reports:
-      junit:
-        - $TEST_CODE_PATH/**/rspec.xml
-      coverage_report:
-        coverage_format: cobertura
-        path: $TEST_CODE_PATH/**/coverage.cobertura.xml
+  variables:
+    DOTNET_TEST_TARGET: test/HamsterWheel.Data.Mapper.UnitTests
+    TEST_RESULTS_DIR: ./test-results/unit
+    COVERAGE_EXCLUDE_FILTER: "[*]*.Program [Humanizer]* [HamsterWheel.Exceptions*]* [HamsterWheel.Utils*]*"
 
+badges:
+  extends: .badges
+  allow_failure: true
+  variables:
+    BADGE_SLUG: datamapper
+    BADGES_SUITES: "unit=test-results/unit"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: on_success
+      variables:
+        BADGES_PIPELINE_STATE: passed
+
+badges-failed:
+  extends: .badges
+  allow_failure: true
+  variables:
+    BADGE_SLUG: datamapper
+    BADGES_SUITES: "unit=test-results/unit"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: on_failure
+      variables:
+        BADGES_PIPELINE_STATE: failed
+
+release:
+  extends: .release
+  stage: release
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+  variables:
+    GIT_DEPTH: "0"
+    BADGE_SLUG: datamapper
+    GITHUB_MIRROR_URL: "git@github.com:npodbielski/HamsterWheel.Data.Mapper.git"
+
+release-policy:
+  extends: .release-policy
+  stage: test
+
+readme-check:
+  extends: .readme-check
+  stage: test
+  variables:
+    BADGE_SLUG: datamapper
+    README_BADGES: "release,pipeline,tests,coverage-unit"
+    README_PACKAGE_PREFIXES: HamsterWheel
 
 package-alpha:
   stage: deploy
@@ -69,6 +128,8 @@ package-alpha:
 
 package:
   stage: deploy
+  needs:
+    - release
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
   script:

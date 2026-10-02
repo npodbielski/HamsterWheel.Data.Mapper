@@ -507,4 +507,54 @@ partial class DataMapperUnitTests
         //assert
         destination.Should().BeEquivalentTo(new { Prop2 = 1 });
     }
+
+    [Fact]
+    public void Map_WhenSourceHaveAmbigousProps_ThenCanMap()
+    {
+        //arrange
+        var source = new
+        {
+            Data =
+                new InputWithAmbigousProps
+                {
+                    Id = Guid.Parse("01a01a42-83fd-7e8b-b6b1-7fa129680bfc"),
+                    Name = "Natetn"
+                },
+            Link = new Uri("/core/api", UriKind.Relative),
+        };
+        var destination = new Output();
+
+
+        //act
+        Map(source, destination, [(AnyProperty, "Provider." + AnyProperty), ("Data.*", "Provider." + AnyProperty)]);
+
+        //assert
+        destination.Provider.Should().BeEquivalentTo(new
+        {
+            source.Data.Id,
+            source.Data.Name,
+            source.Link
+        });
+    }
+
+    public sealed class InputWithAmbigousProps
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = default!;
+        public NestedClassWithTheSameProps CreatedBy { get; set; } = default!;
+    }
+
+    public class Output
+    {
+        public NestedClassWithTheSameProps? Provider { get; init; }
+    }
+
+    public class NestedClassWithTheSameProps
+    {
+        public Guid Id { get; set; }
+
+        public string Name { get; set; } = null!;
+
+        public Uri Link { get; set; } = null!;
+    }
 }

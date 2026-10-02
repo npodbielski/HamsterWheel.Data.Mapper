@@ -1,4 +1,4 @@
-![Latest Release](https://internetexception.com/wp-content/uploads/datamapper/release.svg) ![Status](https://internetexception.com/wp-content/uploads/datamapper/pipeline.svg) ![Coverage](https://internetexception.com/wp-content/uploads/datamapper/coverage.svg)
+![Latest Release](https://internetexception.com/wp-content/uploads/datamapper-badges/release.svg) ![Pipeline](https://internetexception.com/wp-content/uploads/datamapper-badges/pipeline.svg) ![Tests](https://internetexception.com/wp-content/uploads/datamapper-badges/tests.svg) ![Unit](https://internetexception.com/wp-content/uploads/datamapper-badges/coverage-unit.svg)
 
 # Introduction
 
@@ -58,7 +58,7 @@ To use the mapper, you need to add the package to your project.
 
 ```xml
 
-<PackageReference Include="HamsterWheel.Data.Mapper" Version="0.5.1"/>
+<PackageReference Include="HamsterWheel.Data.Mapper" Version="0.6.0"/>
 ```
 
 After that, you can write the code that will map one object to another. For example:

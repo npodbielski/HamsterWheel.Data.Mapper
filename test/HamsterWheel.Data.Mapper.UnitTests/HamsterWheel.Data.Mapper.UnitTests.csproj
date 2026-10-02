@@ -1,5 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+    <PropertyGroup>
+      <TargetFramework>net10.0</TargetFramework>
+    </PropertyGroup>
+
     <ItemGroup>
       <Compile Update="BuildMapUnitTests.cs">
         <DependentUpon>MapBuilderUnitTests.cs</DependentUpon>
@@ -18,6 +22,9 @@
       </Compile>
       <Compile Update="ToDestProp.cs">
         <DependentUpon>PropertyAccessorFactoryUnitTests.cs</DependentUpon>
+      </Compile>
+      <Compile Update="CrossTypeMappingUnitTests.cs">
+        <DependentUpon>DataMapperUnitTests.cs</DependentUpon>
       </Compile>
     </ItemGroup>
 

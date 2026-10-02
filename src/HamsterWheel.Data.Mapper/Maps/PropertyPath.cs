@@ -9,5 +9,5 @@ public record PropertyPath(PropertyPathChunk[] Chunks)
 
     public static PropertyPath From(string propertyPath) => propertyPath == DataMapper.EntireSource
         ? new PropertyPath([new PropertyPathChunk(DataMapper.EntireSource)])
-        : new PropertyPath(propertyPath.Split('.').Select(c => new PropertyPathChunk(c)).ToArray());
+        : new PropertyPath([.. propertyPath.Split('.').Select(c => new PropertyPathChunk(c))]);
 }
